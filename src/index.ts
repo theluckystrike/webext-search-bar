@@ -1,1 +1,1 @@
-export { SearchBar } from './search';
+export { SearchBar, SearchBarError, SearchBarErrorCode } from './search';
