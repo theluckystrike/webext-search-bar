@@ -1,166 +1,139 @@
-# webext-search-bar — Search Component for Extensions
+# webext-search-bar
 
-[![npm version](https://img.shields.io/npm/v/webext-search-bar)](https://npmjs.com/package/webext-search-bar)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
-[![Chrome Web Extension](https://img.shields.io/badge/Chrome-Web%20Extension-orange.svg)](https://developer.chrome.com/docs/extensions/)
-[![CI Status](https://github.com/theluckystrike/webext-search-bar/actions/workflows/ci.yml/badge.svg)](https://github.com/theluckystrike/webext-search-bar/actions)
-[![Discord](https://img.shields.io/badge/Discord-Zovo-blueviolet.svg?logo=discord)](https://discord.gg/zovo)
-[![Website](https://img.shields.io/badge/Website-zovo.one-blue)](https://zovo.one)
-[![GitHub Stars](https://img.shields.io/github/stars/theluckystrike/webext-search-bar?style=social)](https://github.com/theluckystrike/webext-search-bar)
+> Search bar component for Chrome extensions -- autocomplete, fuzzy matching, search history, keyboard navigation, and result highlighting for MV3.
 
-> Fuzzy search with autocomplete dropdown, history, highlighting, and render-to-container.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**webext-search-bar** provides a powerful search component for Chrome extensions. Implement fuzzy search, autocomplete dropdowns, search history, and text highlighting with a simple, customizable API.
-
-Part of the [Zovo](https://zovo.one) developer tools family.
-
-## Features
-
-- ✅ **Fuzzy Search** - Smart matching with typos
-- ✅ **Autocomplete Dropdown** - Show results as you type
-- ✅ **Search History** - Remember recent searches
-- ✅ **Text Highlighting** - Highlight matched text
-- ✅ **Render-to-Container** - Render anywhere in DOM
-- ✅ **TypeScript Support** - Full type definitions included
-
-## Installation
+## Install
 
 ```bash
 npm install webext-search-bar
 ```
 
-## Quick Start
+## Usage
 
 ```typescript
 import { SearchBar } from 'webext-search-bar';
 
-const search = new SearchBar(['Settings', 'History', 'Bookmarks']);
-search.render('search-container', (item) => navigate(item));
-```
+// Create a search bar with items and max history size
+const bar = new SearchBar(['Settings', 'Profile', 'Dashboard', 'Logout'], 10);
 
-## Usage Examples
+// Programmatic search with fuzzy matching
+const results = bar.search('set');
+// => ['Settings']
 
-### Basic Search
+// Highlight matching text in results
+const highlighted = SearchBar.highlight('Settings', 'set');
+// => '<mark>Set</mark>tings'
 
-```typescript
-const search = new SearchBar([
-  { id: 1, title: 'Settings', category: 'General' },
-  { id: 2, title: 'History', category: 'Privacy' },
-  { id: 3, title: 'Bookmarks', category: 'Tools' },
-]);
+// Manage search history
+bar.addToHistory('Settings');
+bar.getHistory();
+// => ['Settings']
 
-search.render('search-container', (item) => {
-  console.log('Selected:', item.title);
-});
-```
+// Persist history to chrome.storage
+await bar.saveHistory('my_history_key');
+await bar.loadHistory('my_history_key');
 
-### With Fuzzy Matching
-
-```typescript
-const search = new SearchBar(items, {
-  fuzzy: true,
-  threshold: 0.4,  // Similarity threshold (0-1)
-});
-
-// Now searches match partial and fuzzy matches
-search.search('stngs');  // Matches 'Settings'
-```
-
-### With Autocomplete
-
-```typescript
-const search = new SearchBar(items, {
-  autocomplete: true,
-  maxResults: 10,
-  showCategories: true,
-});
-```
-
-### Search History
-
-```typescript
-const search = new SearchBar(items, {
-  history: true,
-  historySize: 20,  // Max history items
-  persistHistory: true,  // Save to chrome.storage
-});
-```
-
-### Custom Rendering
-
-```typescript
-const search = new SearchBar(items, {
-  renderItem: (item) => {
-    return `<div class="result-item">
-      <span class="title">${item.title}</span>
-      <span class="category">${item.category}</span>
-    </div>`;
-  },
-  highlightMatches: true,
-  highlightClass: 'match-highlight',
+// Render an interactive search bar into the DOM
+bar.render('search-container', (selected) => {
+  console.log('User selected:', selected);
 });
 ```
 
 ## API
 
-### SearchBar Class
+### `SearchBar` (class)
 
-| Method | Description |
-|--------|-------------|
-| `new SearchBar(items, options?)` | Create search bar |
-| `search.render(container, onSelect)` | Render to container |
-| `search.setItems(items)` | Update search items |
-| `search.clearHistory()` | Clear search history |
-| `search.destroy()` | Cleanup event listeners |
+#### `new SearchBar(items?: string[], maxHistory?: number)`
 
-### Options
+Creates a new search bar instance.
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| fuzzy | boolean | false | Enable fuzzy matching |
-| threshold | number | 0.3 | Match threshold (0-1) |
-| autocomplete | boolean | false | Show dropdown |
-| maxResults | number | 5 | Max results to show |
-| history | boolean | false | Enable search history |
-| highlightMatches | boolean | false | Highlight matched text |
+- **items** (`string[]`, default `[]`) -- Initial list of searchable items.
+- **maxHistory** (`number`, default `20`) -- Maximum number of history entries to retain.
 
-## Contributing
+#### `setItems(items: string[]): this`
 
-Contributions are welcome! Please follow these steps:
+Replaces the searchable items list. Returns the instance for chaining.
 
-1. **Fork** the repository
-2. **Create** a feature branch: `git checkout -b feature/search-feature`
-3. **Make** your changes
-4. **Test** your changes: `npm test`
-5. **Commit** your changes: `git commit -m 'Add new feature'`
-6. **Push** to the branch: `git push origin feature/search-feature`
-7. **Submit** a Pull Request
+- **items** (`string[]`) -- The new list of searchable items.
 
-## Built by Zovo
+#### `search(query: string): string[]`
 
-Part of the [Zovo](https://zovo.one) developer tools family — privacy-first Chrome extensions built by developers, for developers.
+Performs a case-insensitive substring search across all items, sorted by match position.
 
-## See Also
+- **query** (`string`) -- The search query.
+- **Returns** `string[]` -- Matching items sorted by relevance.
 
-### Related Zovo Repositories
+#### `static highlight(text: string, query: string): string`
 
-- [chrome-tab-search](https://github.com/theluckystrike/chrome-tab-search) - Tab search
-- [webext-quick-settings](https://github.com/theluckystrike/webext-quick-settings) - Settings panel
-- [chrome-storage-plus](https://github.com/theluckystrike/chrome-storage-plus) - Type-safe storage
+Wraps matching portions of text in `<mark>` tags for display.
 
-### Zovo Chrome Extensions
+- **text** (`string`) -- The text to highlight within.
+- **query** (`string`) -- The substring to highlight.
+- **Returns** `string` -- HTML string with `<mark>` tags around matches.
 
-- [Zovo Tab Manager](https://chrome.google.com/webstore/detail/zovo-tab-manager) - Manage tabs efficiently
-- [Zovo Focus](https://chrome.google.com/webstore/detail/zovo-focus) - Block distractions
-- [Zovo Permissions Scanner](https://chrome.google.com/webstore/detail/zovo-permissions-scanner) - Check extension privacy grades
+#### `addToHistory(query: string): void`
 
-Visit [zovo.one](https://zovo.one) for more information.
+Adds a query to the front of the search history, deduplicating and capping at `maxHistory`.
+
+- **query** (`string`) -- The search query to record.
+
+#### `getHistory(): string[]`
+
+Returns a copy of the current search history array.
+
+- **Returns** `string[]` -- The search history entries.
+
+#### `clearHistory(): void`
+
+Clears all search history entries.
+
+#### `saveHistory(key?: string): Promise<void>`
+
+Persists search history to `chrome.storage.local`.
+
+- **key** (`string`, default `'__search_history__'`) -- The storage key.
+- **Throws** `SearchBarError` with code `STORAGE_ERROR` if storage is unavailable or the key is invalid.
+
+#### `loadHistory(key?: string): Promise<void>`
+
+Loads search history from `chrome.storage.local`.
+
+- **key** (`string`, default `'__search_history__'`) -- The storage key.
+- **Throws** `SearchBarError` with code `STORAGE_ERROR` if storage is unavailable or the key is invalid.
+
+#### `render(containerId: string, onSelect: (item: string) => void): void`
+
+Renders an interactive search bar with dropdown suggestions into a DOM container.
+
+- **containerId** (`string`) -- The `id` of the container element.
+- **onSelect** (`(item: string) => void`) -- Callback invoked when the user selects a result.
+- **Throws** `SearchBarError` with code `INVALID_CONTAINER` if the element is not found, `INVALID_CALLBACK` if `onSelect` is not a function, or `RENDER_ERROR` on DOM failures.
+
+### `SearchBarError` (class)
+
+Custom error class with structured metadata.
+
+#### `new SearchBarError(message: string, code: string, operation: string, originalError?: Error)`
+
+- **message** (`string`) -- Human-readable error message.
+- **code** (`string`) -- One of the `SearchBarErrorCode` values.
+- **operation** (`string`) -- The method name that threw the error.
+- **originalError** (`Error`, optional) -- The underlying error, if any.
+
+### `SearchBarErrorCode` (const object)
+
+Error code constants:
+
+| Code                 | Description                          |
+| -------------------- | ------------------------------------ |
+| `STORAGE_ERROR`      | chrome.storage read/write failure    |
+| `INVALID_CONTAINER`  | Container element not found in DOM   |
+| `INVALID_CALLBACK`   | Callback argument is not a function  |
+| `INVALID_QUERY`      | Invalid search query                 |
+| `RENDER_ERROR`       | DOM rendering failure                |
 
 ## License
 
-MIT — [Zovo](https://zovo.one)
-
----
-
-*Built by developers, for developers. No compromises on privacy.*
+MIT
