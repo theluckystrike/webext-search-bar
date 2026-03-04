@@ -9,6 +9,8 @@
 
 > Search bar component for Chrome extensions -- autocomplete, fuzzy matching, search history, keyboard navigation, and result highlighting for MV3.
 
+Part of the [Zovo](https://zovo.one) developer tools family.
+
 ## Install
 
 ```bash
