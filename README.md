@@ -171,3 +171,7 @@ Built by [Zovo](https://zovo.one)
 - [Zovo Focus](https://chrome.google.com/webstore/detail/zovo-focus) - Block distractions
 
 Visit [zovo.one](https://zovo.one) for more information.
+
+---
+
+Built by [Zovo](https://zovo.one)
